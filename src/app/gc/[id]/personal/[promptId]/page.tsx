@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
-import { useMe, sameName } from "@/lib/identity";
+import { useMe, sameName, useDevice } from "@/lib/identity";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 import { RankBuilder } from "@/components/RankBuilder";
@@ -15,6 +15,7 @@ export default function PersonalBallotPage() {
   const { id, promptId } = useParams<{ id: string; promptId: string }>();
   const { data, loading } = useAppData();
   const [me] = useMe();
+  const device = useDevice();
 
   const gc = useMemo(
     () => data?.groupChats.find((g) => g.id === id),
@@ -37,7 +38,9 @@ export default function PersonalBallotPage() {
     [data, id, prompt]
   );
 
-  const myBallot = ballots.find((b) => sameName(b.rater ?? "", me));
+  const identityName =
+    gc?.people.find((p) => p.claimedBy && p.claimedBy === device)?.name ?? me;
+  const myBallot = ballots.find((b) => sameName(b.rater ?? "", identityName));
 
   const [myOrder, setMyOrder] = useState<string[] | null>(null);
   const [seeded, setSeeded] = useState(false);
@@ -58,7 +61,7 @@ export default function PersonalBallotPage() {
 
   function save(next: string[]) {
     setMyOrder(next);
-    store.saveBallot(gc!.id, prompt!.title, me || "Anonymous", next);
+    store.saveBallot(gc!.id, prompt!.title, identityName || "Anonymous", next);
   }
 
   return (
@@ -111,7 +114,7 @@ export default function PersonalBallotPage() {
                   {initials(b.rater ?? "?")}
                 </span>
                 {b.rater}
-                {sameName(b.rater ?? "", me) && (
+                {sameName(b.rater ?? "", identityName) && (
                   <span className="text-brand-500">you</span>
                 )}
               </span>

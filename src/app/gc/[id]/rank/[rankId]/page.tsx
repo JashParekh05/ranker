@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Reorder, motion } from "motion/react";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
-import { useMe, sameName } from "@/lib/identity";
+import { useMe, sameName, useDevice } from "@/lib/identity";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 import { RankBuilder } from "@/components/RankBuilder";
@@ -33,7 +33,10 @@ export default function RankingEditorPage() {
     [data, rankId]
   );
 
-  const isAuthor = ranking ? sameName(ranking.author, me) : false;
+  const device = useDevice();
+  const identityName =
+    gc?.people.find((p) => p.claimedBy && p.claimedBy === device)?.name ?? me;
+  const isAuthor = ranking ? sameName(ranking.author, identityName) : false;
 
   // author edits a live-committed order; non-author edits a draft proposal
   const [authorOrder, setAuthorOrder] = useState<string[] | null>(null);
@@ -54,7 +57,7 @@ export default function RankingEditorPage() {
   const peopleById = new Map(gc.people.map((p) => [p.id, p]));
   const liveOrder = ranking.order;
   const pending = revisions.filter((r) => r.status === "pending");
-  const myProposals = revisions.filter((r) => sameName(r.proposedBy, me));
+  const myProposals = revisions.filter((r) => sameName(r.proposedBy, identityName));
 
   function authorReorder(next: string[]) {
     setAuthorOrder(next);
@@ -168,7 +171,7 @@ export default function RankingEditorPage() {
                       await store.proposeRevision(
                         rankId,
                         gc.id,
-                        me || "Anonymous",
+                        identityName || "Anonymous",
                         draft
                       );
                       setDraft(null);

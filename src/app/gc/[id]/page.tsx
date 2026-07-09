@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
-import { useMe } from "@/lib/identity";
+import { useMe, useDevice, setMe } from "@/lib/identity";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 import { RankingCard } from "@/components/RankingCard";
@@ -17,8 +17,14 @@ export default function GcHubPage() {
   const router = useRouter();
   const { data, refresh, loading } = useAppData();
   const [me] = useMe();
+  const device = useDevice();
 
   const gc = useMemo(() => data?.groupChats.find((g) => g.id === id), [data, id]);
+  const myPerson = useMemo(
+    () => gc?.people.find((p) => p.claimedBy && p.claimedBy === device),
+    [gc, device]
+  );
+  const identityName = myPerson?.name ?? me;
   const rankings = useMemo(
     () =>
       (data?.rankings ?? [])
@@ -50,6 +56,7 @@ export default function GcHubPage() {
   const [newPersonal, setNewPersonal] = useState("");
   const [newPerson, setNewPerson] = useState("");
   const [invite, setInvite] = useState(false);
+  const [reclaim, setReclaim] = useState(false);
   const [manageRoster, setManageRoster] = useState(false);
   const [copied, setCopied] = useState(false);
   const createRef = useRef<HTMLInputElement>(null);
@@ -67,13 +74,13 @@ export default function GcHubPage() {
 
   async function createRanking() {
     if (!newRank.trim()) return;
-    const r = await store.createRanking(gc!.id, newRank, me || "Anonymous");
+    const r = await store.createRanking(gc!.id, newRank, identityName || "Anonymous");
     setNewRank("");
     router.push(`/gc/${gc!.id}/rank/${r.id}`);
   }
   async function createPersonal() {
     if (!newPersonal.trim()) return;
-    await store.createPersonalPrompt(gc!.id, newPersonal, me || "Anonymous");
+    await store.createPersonalPrompt(gc!.id, newPersonal, identityName || "Anonymous");
     setNewPersonal("");
     refresh();
   }
@@ -84,10 +91,11 @@ export default function GcHubPage() {
     refresh();
   }
   function share() {
-    const text = `Join "${gc!.name}" on GC Rankings with code ${gc!.code}: ${location.origin}`;
-    if (navigator.share) navigator.share({ title: gc!.name, text }).catch(() => {});
+    const link = `${location.origin}/join/${gc!.code}`;
+    const text = `Join "${gc!.name}" on GC Rankings: ${link}`;
+    if (navigator.share) navigator.share({ title: gc!.name, text, url: link }).catch(() => {});
     else {
-      navigator.clipboard?.writeText(gc!.code);
+      navigator.clipboard?.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     }
@@ -141,6 +149,41 @@ export default function GcHubPage() {
           </Card>
         )}
 
+        {/* Claim your identity (no login) */}
+        {device && gc.people.length > 0 && (!myPerson || reclaim) && (
+          <Card className="mb-6 p-4">
+            <div className="mb-1 text-sm font-semibold text-ink">
+              Who are you in this group?
+            </div>
+            <p className="mb-3 text-xs text-muted">
+              Claim your spot so your rankings and approvals are really yours.
+              No login, just tap your name on this device.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {gc.people.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={async () => {
+                    await store.claimPerson(gc.id, p.id, device);
+                    if (!me) setMe(p.name);
+                    setReclaim(false);
+                    refresh();
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm text-ink transition hover:bg-white/10"
+                >
+                  <span
+                    className="grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold text-white"
+                    style={{ background: colorFor(p.id) }}
+                  >
+                    {initials(p.name)}
+                  </span>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </Card>
+        )}
+
         {/* Roster with standing */}
         <section className="mb-8">
           <div className="mb-3 flex items-center justify-between">
@@ -150,12 +193,22 @@ export default function GcHubPage() {
                 {gc.people.length}
               </span>
             </h2>
-            <button
-              onClick={() => setManageRoster((v) => !v)}
-              className="text-sm font-semibold text-brand-300 hover:text-brand-300"
-            >
-              {manageRoster ? "Done" : "Edit"}
-            </button>
+            <div className="flex items-center gap-3">
+              {myPerson && (
+                <button
+                  onClick={() => setReclaim(true)}
+                  className="text-xs text-muted hover:text-brand-200"
+                >
+                  you are <span className="font-semibold text-brand-200">{myPerson.name}</span> · change
+                </button>
+              )}
+              <button
+                onClick={() => setManageRoster((v) => !v)}
+                className="text-sm font-semibold text-brand-300 hover:text-brand-200"
+              >
+                {manageRoster ? "Done" : "Edit"}
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-end gap-x-3 gap-y-4">

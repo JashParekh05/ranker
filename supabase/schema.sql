@@ -11,7 +11,8 @@ create table if not exists gc_people (
   id uuid primary key,
   gc_id uuid not null references gc_group_chats(id) on delete cascade,
   name text not null,
-  tag text
+  tag text,
+  claimed_by text   -- anonymous device token that claimed this person ("this is me")
 );
 
 create table if not exists gc_rankings (

@@ -131,6 +131,17 @@ const localStore = {
       r.order = r.order.filter((id) => id !== personId);
     writeLocal(data);
   },
+  async claimPerson(gcId: string, personId: string, deviceId: string) {
+    const data = readLocal();
+    const gc = data.groupChats.find((g) => g.id === gcId);
+    if (!gc) return;
+    // one claim per device per group
+    for (const p of gc.people)
+      if (p.claimedBy === deviceId) p.claimedBy = null;
+    const target = gc.people.find((p) => p.id === personId);
+    if (target) target.claimedBy = deviceId;
+    writeLocal(data);
+  },
   async getRankings(gcId: string) {
     return readLocal()
       .rankings.filter((r) => r.gcId === gcId)
@@ -303,7 +314,12 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         createdAt: Number(g.created_at),
         people: (people ?? [])
           .filter((p) => p.gc_id === g.id)
-          .map((p) => ({ id: p.id, name: p.name, tag: p.tag ?? undefined })),
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            tag: p.tag ?? undefined,
+            claimedBy: p.claimed_by ?? null,
+          })),
       }));
       const rankings: Ranking[] = (ranks ?? []).map((r) => ({
         id: r.id,
@@ -386,6 +402,19 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         const next = (r.order ?? []).filter((x: string) => x !== personId);
         await db.from("gc_rankings").update({ order: next }).eq("id", r.id);
       }
+      emitChange();
+    },
+    async claimPerson(gcId: string, personId: string, deviceId: string) {
+      // release any prior claim by this device in this group
+      await db
+        .from("gc_people")
+        .update({ claimed_by: null })
+        .eq("gc_id", gcId)
+        .eq("claimed_by", deviceId);
+      await db
+        .from("gc_people")
+        .update({ claimed_by: deviceId })
+        .eq("id", personId);
       emitChange();
     },
     async getRankings(gcId: string) {

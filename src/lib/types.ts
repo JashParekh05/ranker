@@ -5,6 +5,8 @@ export type Person = {
   name: string;
   /** optional emoji or short tag shown on the node */
   tag?: string;
+  /** anonymous device token that has claimed "this is me" for this person */
+  claimedBy?: string | null;
 };
 
 export type GroupChat = {

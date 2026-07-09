@@ -1,8 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { v4 as uuid } from "uuid";
 
 const ME_KEY = "gc-rankings:me";
+const DEVICE_KEY = "gc-rankings:device";
+
+/** Persistent anonymous device token. Created once per browser, never shown. */
+export function getDeviceId(): string {
+  if (typeof window === "undefined") return "";
+  let d = window.localStorage.getItem(DEVICE_KEY);
+  if (!d) {
+    d = uuid();
+    window.localStorage.setItem(DEVICE_KEY, d);
+  }
+  return d;
+}
 
 export function getMe(): string {
   if (typeof window === "undefined") return "";
@@ -34,4 +47,11 @@ export function useMe(): [string, (n: string) => void] {
     };
   }, []);
   return [me, setMe];
+}
+
+/** Reactive hook for the persistent device token (empty during SSR). */
+export function useDevice(): string {
+  const [d, setD] = useState("");
+  useEffect(() => setD(getDeviceId()), []);
+  return d;
 }
