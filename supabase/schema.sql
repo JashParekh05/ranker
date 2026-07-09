@@ -19,6 +19,7 @@ create table if not exists gc_rankings (
   gc_id uuid not null references gc_group_chats(id) on delete cascade,
   title text not null,
   "order" text[] not null default '{}',
+  prev_order text[] not null default '{}',   -- order before last edit, for movement arrows
   author text not null default 'Anonymous',
   kind text not null default 'category',   -- 'category' | 'personal'
   rater text,                              -- personal ballots: the rater's name; null = prompt marker

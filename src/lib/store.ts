@@ -219,7 +219,10 @@ const localStore = {
     const r = data.rankings.find((x) => x.id === id);
     if (!r) return;
     if (patch.title !== undefined) r.title = patch.title.trim() || r.title;
-    if (patch.order !== undefined) r.order = patch.order;
+    if (patch.order !== undefined) {
+      r.prevOrder = r.order;
+      r.order = patch.order;
+    }
     r.updatedAt = Date.now();
     writeLocal(data);
   },
@@ -261,6 +264,7 @@ const localStore = {
     if (!rev) return;
     const r = data.rankings.find((x) => x.id === rev.rankingId);
     if (r) {
+      r.prevOrder = r.order;
       r.order = rev.order;
       r.updatedAt = Date.now();
     }
@@ -306,6 +310,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         gcId: r.gc_id,
         title: r.title,
         order: r.order ?? [],
+        prevOrder: r.prev_order ?? [],
         author: r.author ?? "Anonymous",
         kind: (r.kind ?? "category") as Ranking["kind"],
         rater: r.rater ?? null,
@@ -484,7 +489,15 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
     ) {
       const upd: Record<string, unknown> = { updated_at: Date.now() };
       if (patch.title !== undefined) upd.title = patch.title.trim();
-      if (patch.order !== undefined) upd.order = patch.order;
+      if (patch.order !== undefined) {
+        const { data: cur } = await db
+          .from("gc_rankings")
+          .select("order")
+          .eq("id", id)
+          .limit(1);
+        upd.prev_order = cur?.[0]?.order ?? [];
+        upd.order = patch.order;
+      }
       await db.from("gc_rankings").update(upd).eq("id", id);
       emitChange();
     },
@@ -532,9 +545,18 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         .limit(1);
       const rev = revRows?.[0];
       if (!rev) return;
+      const { data: curRows } = await db
+        .from("gc_rankings")
+        .select("order")
+        .eq("id", rev.ranking_id)
+        .limit(1);
       await db
         .from("gc_rankings")
-        .update({ order: rev.order, updated_at: Date.now() })
+        .update({
+          order: rev.order,
+          prev_order: curRows?.[0]?.order ?? [],
+          updated_at: Date.now(),
+        })
         .eq("id", rev.ranking_id);
       await db
         .from("gc_revisions")

@@ -24,6 +24,8 @@ export type Ranking = {
   title: string; // e.g. "Performativeness", "Funniest", or a personal prompt
   /** ordered list of person ids, index 0 = rank 1 (top) */
   order: string[];
+  /** the order before the most recent edit, for movement arrows */
+  prevOrder?: string[];
   /** display name of the person who created this ranking */
   author: string;
   /**
