@@ -16,14 +16,24 @@ export type GroupChat = {
   people: Person[];
 };
 
+export type RankingKind = "category" | "personal";
+
 export type Ranking = {
   id: string;
   gcId: string;
-  title: string; // e.g. "Performativeness", "Funniest"
+  title: string; // e.g. "Performativeness", "Funniest", or a personal prompt
   /** ordered list of person ids, index 0 = rank 1 (top) */
   order: string[];
   /** display name of the person who created this ranking */
   author: string;
+  /**
+   * "category" (default): one author ranks the roster for a trait.
+   * "personal": part of an "everyone ranks everyone" set. A row with
+   *   rater=null is the prompt marker; rows with rater set are ballots.
+   */
+  kind: RankingKind;
+  /** for personal ballots: the display name of the rater who submitted it */
+  rater?: string | null;
   createdAt: number;
   updatedAt: number;
 };

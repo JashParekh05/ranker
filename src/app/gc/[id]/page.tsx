@@ -24,12 +24,24 @@ export default function GcHubPage() {
   const rankings = useMemo(
     () =>
       (data?.rankings ?? [])
-        .filter((r) => r.gcId === id)
+        .filter((r) => r.gcId === id && r.kind !== "personal")
         .sort((a, b) => b.updatedAt - a.updatedAt),
     [data, id]
   );
+  const personalPrompts = useMemo(
+    () =>
+      (data?.rankings ?? [])
+        .filter((r) => r.gcId === id && r.kind === "personal" && r.rater == null)
+        .sort((a, b) => b.createdAt - a.createdAt),
+    [data, id]
+  );
+  const ballotsFor = (title: string) =>
+    (data?.rankings ?? []).filter(
+      (r) => r.gcId === id && r.kind === "personal" && r.rater != null && r.title === title
+    ).length;
 
   const [newRank, setNewRank] = useState("");
+  const [newPersonal, setNewPersonal] = useState("");
   const [newPerson, setNewPerson] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -55,6 +67,13 @@ export default function GcHubPage() {
     if (!newPerson.trim()) return;
     await store.addPerson(gc!.id, newPerson);
     setNewPerson("");
+    refresh();
+  }
+
+  async function createPersonal() {
+    if (!newPersonal.trim()) return;
+    await store.createPersonalPrompt(gc!.id, newPersonal, me || "Anonymous");
+    setNewPersonal("");
     refresh();
   }
 
@@ -230,6 +249,53 @@ export default function GcHubPage() {
                   </motion.div>
                 );
               })}
+            </div>
+          )}
+        </section>
+
+        {/* Personal rankings (everyone ranks everyone) */}
+        <section className="mt-10">
+          <h2 className="mb-1 font-display text-sm font-700 uppercase tracking-wide text-muted">
+            Personal rankings
+          </h2>
+          <p className="mb-3 text-sm text-muted">
+            Everyone ranks everyone. Powers the Reciprocity graph (who rates who
+            highly, and who is one-sided).
+          </p>
+
+          <Card className="mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+            <input
+              value={newPersonal}
+              onChange={(e) => setNewPersonal(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && createPersonal()}
+              placeholder="Prompt (e.g. Rank the group, best to worst wingman)"
+              className="flex-1 rounded-full border border-brand-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+            />
+            <Button onClick={createPersonal} disabled={!newPersonal.trim()}>
+              Create personal ranking
+            </Button>
+          </Card>
+
+          {personalPrompts.length === 0 ? (
+            <Card className="p-8 text-center text-muted">
+              No personal rankings yet. Create one and everyone fills their own
+              ballot.
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {personalPrompts.map((pr) => (
+                <Link key={pr.id} href={`/gc/${gc.id}/personal/${pr.id}`}>
+                  <Card className="p-5 transition hover:-translate-y-1 hover:shadow-pop">
+                    <div className="font-display text-lg font-700 text-ink">
+                      {pr.title}
+                    </div>
+                    <div className="mt-2 flex gap-3 text-sm text-muted">
+                      <span>{ballotsFor(pr.title)} ballots</span>
+                      <span>started by {pr.author}</span>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
             </div>
           )}
         </section>

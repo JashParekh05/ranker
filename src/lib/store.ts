@@ -152,12 +152,64 @@ const localStore = {
       title: title.trim() || "Untitled ranking",
       order: [],
       author: author.trim() || "Anonymous",
+      kind: "category",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
     data.rankings.push(ranking);
     writeLocal(data);
     return ranking;
+  },
+  async createPersonalPrompt(gcId: string, title: string, author: string) {
+    const data = readLocal();
+    const prompt: Ranking = {
+      id: uuid(),
+      gcId,
+      title: title.trim() || "Rank everyone",
+      order: [],
+      author: author.trim() || "Anonymous",
+      kind: "personal",
+      rater: null,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    data.rankings.push(prompt);
+    writeLocal(data);
+    return prompt;
+  },
+  async saveBallot(
+    gcId: string,
+    promptTitle: string,
+    rater: string,
+    order: string[]
+  ) {
+    const data = readLocal();
+    let ballot = data.rankings.find(
+      (r) =>
+        r.gcId === gcId &&
+        r.kind === "personal" &&
+        r.rater != null &&
+        r.title === promptTitle &&
+        r.rater.trim().toLowerCase() === rater.trim().toLowerCase()
+    );
+    if (ballot) {
+      ballot.order = order;
+      ballot.updatedAt = Date.now();
+    } else {
+      ballot = {
+        id: uuid(),
+        gcId,
+        title: promptTitle,
+        order,
+        author: rater,
+        kind: "personal",
+        rater,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      data.rankings.push(ballot);
+    }
+    writeLocal(data);
   },
   async saveRanking(
     id: string,
@@ -255,6 +307,8 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         title: r.title,
         order: r.order ?? [],
         author: r.author ?? "Anonymous",
+        kind: (r.kind ?? "category") as Ranking["kind"],
+        rater: r.rater ?? null,
         createdAt: Number(r.created_at),
         updatedAt: Number(r.updated_at),
       }));
@@ -344,6 +398,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         title: title.trim() || "Untitled ranking",
         order: [],
         author: author.trim() || "Anonymous",
+        kind: "category",
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -353,11 +408,75 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         title: ranking.title,
         order: ranking.order,
         author: ranking.author,
+        kind: "category",
         created_at: ranking.createdAt,
         updated_at: ranking.updatedAt,
       });
       emitChange();
       return ranking;
+    },
+    async createPersonalPrompt(gcId: string, title: string, author: string) {
+      const prompt: Ranking = {
+        id: uuid(),
+        gcId,
+        title: title.trim() || "Rank everyone",
+        order: [],
+        author: author.trim() || "Anonymous",
+        kind: "personal",
+        rater: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      await db.from("gc_rankings").insert({
+        id: prompt.id,
+        gc_id: gcId,
+        title: prompt.title,
+        order: [],
+        author: prompt.author,
+        kind: "personal",
+        rater: null,
+        created_at: prompt.createdAt,
+        updated_at: prompt.updatedAt,
+      });
+      emitChange();
+      return prompt;
+    },
+    async saveBallot(
+      gcId: string,
+      promptTitle: string,
+      rater: string,
+      order: string[]
+    ) {
+      const { data: rows } = await db
+        .from("gc_rankings")
+        .select("id, rater")
+        .eq("gc_id", gcId)
+        .eq("kind", "personal")
+        .eq("title", promptTitle)
+        .not("rater", "is", null);
+      const existing = (rows ?? []).find(
+        (r) => (r.rater ?? "").trim().toLowerCase() === rater.trim().toLowerCase()
+      );
+      if (existing) {
+        await db
+          .from("gc_rankings")
+          .update({ order, updated_at: Date.now() })
+          .eq("id", existing.id);
+        emitChange();
+        return;
+      }
+      await db.from("gc_rankings").insert({
+        id: uuid(),
+        gc_id: gcId,
+        title: promptTitle,
+        order,
+        author: rater,
+        kind: "personal",
+        rater,
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      });
+      emitChange();
     },
     async saveRanking(
       id: string,

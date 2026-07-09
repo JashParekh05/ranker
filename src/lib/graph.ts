@@ -73,3 +73,57 @@ export function buildScatter(gc: GroupChat, rankings: Ranking[]): ScatterPoint[]
     appearances: a.appearances,
   }));
 }
+
+export type DirLink = {
+  source: string;
+  target: string;
+  weight: number; // how highly source ranked target (0..1, 1 = their #1)
+  asym: number; // |weight - reverseWeight|, 0 if reverse missing
+};
+
+/**
+ * Directed reciprocity graph from a set of personal ballots (each rater's
+ * ranking of the whole roster). Edge source->target weight = how highly the
+ * rater ranked that person. `asym` flags one-sided relationships.
+ */
+export function buildReciprocity(
+  gc: GroupChat,
+  ballots: Ranking[],
+  minWeight = 0.6
+): { nodes: SimNode[]; links: DirLink[] } {
+  const byRater = new Map<string, Ranking>();
+  for (const b of ballots)
+    if (b.rater) byRater.set(b.rater.trim().toLowerCase(), b);
+
+  const links: DirLink[] = [];
+  const incoming: Record<string, number[]> = {};
+
+  for (const rater of gc.people) {
+    const ballot = byRater.get(rater.name.trim().toLowerCase());
+    if (!ballot) continue;
+    for (const target of gc.people) {
+      if (target.id === rater.id) continue;
+      const s = standing(ballot, target.id);
+      if (s === null) continue;
+      (incoming[target.id] ??= []).push(s);
+      if (s < minWeight) continue;
+      const rb = byRater.get(target.name.trim().toLowerCase());
+      const rs = rb ? standing(rb, rater.id) : null;
+      links.push({
+        source: rater.id,
+        target: target.id,
+        weight: s,
+        asym: rs === null ? 0 : Math.abs(s - rs),
+      });
+    }
+  }
+
+  const nodes: SimNode[] = gc.people.map((p) => {
+    const inc = incoming[p.id] ?? [];
+    const score = inc.length
+      ? inc.reduce((a, b) => a + b, 0) / inc.length
+      : 0.5;
+    return { id: p.id, name: p.name, score };
+  });
+  return { nodes, links };
+}

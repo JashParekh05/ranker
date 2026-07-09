@@ -7,14 +7,9 @@ import { TopBar } from "@/components/ui";
 import { Constellation } from "@/components/viz/Constellation";
 import { SimilarityGraph } from "@/components/viz/SimilarityGraph";
 import { QuadrantScatter } from "@/components/viz/QuadrantScatter";
+import { ReciprocityGraph } from "@/components/viz/ReciprocityGraph";
 
-type View = "constellation" | "similarity" | "quadrant";
-
-const TABS: { id: View; label: string }[] = [
-  { id: "constellation", label: "Constellation" },
-  { id: "similarity", label: "Similarity graph" },
-  { id: "quadrant", label: "Quadrant" },
-];
+type View = "constellation" | "similarity" | "quadrant" | "reciprocity";
 
 export default function MapPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,9 +20,17 @@ export default function MapPage() {
     () => data?.groupChats.find((g) => g.id === id),
     [data, id]
   );
-  const rankings = useMemo(
+  const allRankings = useMemo(
     () => (data?.rankings ?? []).filter((r) => r.gcId === id),
     [data, id]
+  );
+  const categoryRankings = useMemo(
+    () => allRankings.filter((r) => r.kind !== "personal"),
+    [allRankings]
+  );
+  const personal = useMemo(
+    () => allRankings.filter((r) => r.kind === "personal"),
+    [allRankings]
   );
 
   if (loading) return null;
@@ -37,6 +40,15 @@ export default function MapPage() {
         <TopBar title="Not found" back={{ href: `/gc/${id}` }} />
       </main>
     );
+
+  const tabs: { id: View; label: string }[] = [
+    { id: "constellation", label: "Constellation" },
+    { id: "similarity", label: "Similarity graph" },
+    { id: "quadrant", label: "Quadrant" },
+    ...(personal.length > 0
+      ? [{ id: "reciprocity" as View, label: "Reciprocity" }]
+      : []),
+  ];
 
   return (
     <main className="h-screen overflow-hidden bg-[#070d1a]">
@@ -50,7 +62,7 @@ export default function MapPage() {
             {gc.name}
           </a>
           <div className="ml-2 flex gap-1 rounded-full bg-white/5 p-1">
-            {TABS.map((t) => (
+            {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setView(t.id)}
@@ -69,9 +81,18 @@ export default function MapPage() {
       </div>
 
       <div className="h-[calc(100vh-57px)]">
-        {view === "constellation" && <Constellation gc={gc} rankings={rankings} />}
-        {view === "similarity" && <SimilarityGraph gc={gc} rankings={rankings} />}
-        {view === "quadrant" && <QuadrantScatter gc={gc} rankings={rankings} />}
+        {view === "constellation" && (
+          <Constellation gc={gc} rankings={categoryRankings} />
+        )}
+        {view === "similarity" && (
+          <SimilarityGraph gc={gc} rankings={categoryRankings} />
+        )}
+        {view === "quadrant" && (
+          <QuadrantScatter gc={gc} rankings={categoryRankings} />
+        )}
+        {view === "reciprocity" && (
+          <ReciprocityGraph gc={gc} personal={personal} />
+        )}
       </div>
     </main>
   );

@@ -20,6 +20,8 @@ create table if not exists gc_rankings (
   title text not null,
   "order" text[] not null default '{}',
   author text not null default 'Anonymous',
+  kind text not null default 'category',   -- 'category' | 'personal'
+  rater text,                              -- personal ballots: the rater's name; null = prompt marker
   created_at bigint not null,
   updated_at bigint not null
 );
