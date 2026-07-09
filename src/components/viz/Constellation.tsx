@@ -97,8 +97,8 @@ export function Constellation({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 px-5 py-2">
-        <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-white/50">
+      <div className="no-scrollbar flex items-center gap-2 overflow-x-auto px-4 py-2">
+        <span className="mr-1 shrink-0 text-xs font-semibold uppercase tracking-wide text-white/50">
           Orbit by
         </span>
         <Pill active={mode === "overall"} onClick={() => setMode("overall")}>
@@ -111,7 +111,7 @@ export function Constellation({
         ))}
         <button
           onClick={() => setRelayoutKey((k) => k + 1)}
-          className="rounded-full px-3 py-1.5 text-sm font-semibold text-white/60 transition hover:bg-white/10"
+          className="shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold text-white/60 transition hover:bg-white/10"
         >
           Re-layout
         </button>
@@ -150,7 +150,7 @@ export function Constellation({
           style={{ left: cx, top: cy }}
         >
           <div
-            className="grid h-24 w-24 place-items-center rounded-full"
+            className="grid h-16 w-16 place-items-center rounded-full sm:h-24 sm:w-24"
             style={{
               background:
                 "radial-gradient(circle at 50% 45%, #ffe6b8 0%, #f0a94e 55%, #b9701f 100%)",
@@ -166,7 +166,7 @@ export function Constellation({
         {gc.people.map((p) => {
           const pt = pos[p.id] ?? { x: cx, y: cy };
           const s = scoreOf(p.id);
-          const base = 40 + s * 26;
+          const base = (40 + s * 26) * (size.w < 480 ? 0.72 : 1);
           const isHover = hover === p.id;
           const c = colorFor(p.id);
           return (
@@ -236,7 +236,7 @@ function Pill({
     <button
       onClick={onClick}
       className={
-        "rounded-full px-3 py-1.5 text-sm font-semibold transition " +
+        "shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold transition " +
         (active ? "bg-white text-[#0a1120] shadow" : "bg-white/10 text-white/80 hover:bg-white/20")
       }
     >

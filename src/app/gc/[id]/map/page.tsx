@@ -43,7 +43,7 @@ export default function MapPage() {
 
   const tabs: { id: View; label: string }[] = [
     { id: "constellation", label: "Constellation" },
-    { id: "similarity", label: "Similarity graph" },
+    { id: "similarity", label: "Similarity" },
     { id: "quadrant", label: "Quadrant" },
     ...(personal.length > 0
       ? [{ id: "reciprocity" as View, label: "Reciprocity" }]
@@ -53,21 +53,21 @@ export default function MapPage() {
   return (
     <main className="h-[100dvh] overflow-hidden bg-[#070d1a]">
       <div className="border-b border-white/10 bg-[#0a1120]/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-3 py-2.5">
           <a
             href={`/gc/${gc.id}`}
-            className="rounded-full px-3 py-1.5 text-sm font-semibold text-brand-200 transition hover:bg-white/10"
+            className="shrink-0 rounded-full px-2.5 py-1.5 text-base font-semibold text-brand-200 transition hover:bg-white/10"
+            aria-label="Back"
           >
-            {"< "}
-            {gc.name}
+            {"<"}
           </a>
-          <div className="ml-2 flex gap-1 rounded-full bg-white/5 p-1">
+          <div className="no-scrollbar flex flex-1 gap-1 overflow-x-auto rounded-full bg-white/5 p-1">
             {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setView(t.id)}
                 className={
-                  "rounded-full px-4 py-1.5 text-sm font-semibold transition " +
+                  "shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition " +
                   (view === t.id
                     ? "bg-white text-[#0a1120]"
                     : "text-white/70 hover:text-white")
@@ -80,7 +80,7 @@ export default function MapPage() {
         </div>
       </div>
 
-      <div className="h-[calc(100dvh-57px)]">
+      <div className="h-[calc(100dvh-53px)]">
         {view === "constellation" && (
           <Constellation gc={gc} rankings={categoryRankings} />
         )}

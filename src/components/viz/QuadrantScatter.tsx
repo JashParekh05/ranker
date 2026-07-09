@@ -50,7 +50,10 @@ export function QuadrantScatter({
       ? "Controversy"
       : rankings.find((r) => r.id === key)?.title ?? "Ranking";
 
-  const m = { top: 24, right: 28, bottom: 52, left: 60 };
+  const small = size.w < 480;
+  const m = small
+    ? { top: 44, right: 16, bottom: 44, left: 40 }
+    : { top: 24, right: 28, bottom: 52, left: 60 };
   const iw = Math.max(10, size.w - m.left - m.right);
   const ih = Math.max(10, size.h - m.top - m.bottom);
 
