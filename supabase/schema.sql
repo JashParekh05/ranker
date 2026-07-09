@@ -24,6 +24,8 @@ create table if not exists gc_rankings (
   author text not null default 'Anonymous',
   kind text not null default 'category',   -- 'category' | 'personal'
   rater text,                              -- personal ballots: the rater's name; null = prompt marker
+  edit_mode text not null default 'open',  -- 'open' (anyone edits) | 'approval' (owner approves)
+  edited_by text,                          -- display name of the last editor
   created_at bigint not null,
   updated_at bigint not null
 );

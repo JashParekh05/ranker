@@ -62,9 +62,15 @@ export default function RankingEditorPage() {
   const pending = revisions.filter((r) => r.status === "pending");
   const myProposals = revisions.filter((r) => sameName(r.proposedBy, identityName));
 
-  function authorReorder(next: string[]) {
+  const editMode = ranking.editMode ?? "open";
+  const canLive = editMode === "open" || isAuthor;
+
+  function liveReorder(next: string[]) {
     setAuthorOrder(next);
-    store.saveRanking(rankId, { order: next });
+    store.saveRanking(rankId, {
+      order: next,
+      editedBy: identityName || "Anonymous",
+    });
   }
 
   return (
@@ -117,21 +123,49 @@ export default function RankingEditorPage() {
             {ranking.title}
           </h1>
         )}
-        <p className="mb-6 text-sm text-muted">
+        <p className="mb-3 text-sm text-muted">
           by {ranking.author}
-          {isAuthor && " (you)"} . Drag to reorder. Rank 1 is the top.
+          {isAuthor && " (you)"}
+          {ranking.editedBy ? ` . last edited by ${ranking.editedBy}` : ""}
         </p>
 
-        {/* AUTHOR: live drag-and-drop */}
         {isAuthor && (
+          <div className="mb-6 flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+              Edit access
+            </span>
+            <div className="flex gap-1 rounded-full bg-white/5 p-1">
+              {(["open", "approval"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => store.saveRanking(rankId, { editMode: mode })}
+                  className={
+                    "rounded-full px-3 py-1 text-xs font-semibold transition " +
+                    (editMode === mode
+                      ? "bg-white text-base"
+                      : "text-muted hover:text-ink")
+                  }
+                >
+                  {mode === "open" ? "Anyone edits" : "Owner approves"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Live edit: author (any mode) or anyone (open mode) */}
+        {canLive && (
           <>
-            <SectionLabel>Edit ranking (saves live)</SectionLabel>
+            <SectionLabel>
+              {editMode === "open" ? "Edit ranking (anyone)" : "Edit ranking (saves live)"}
+            </SectionLabel>
             <RankBuilder
               order={authorOrder ?? liveOrder}
               roster={gc.people}
-              onChange={authorReorder}
+              onChange={liveReorder}
             />
 
+            {editMode === "approval" && isAuthor && (
             <div className="mt-10">
               <SectionLabel>
                 Pending suggestions
@@ -178,11 +212,12 @@ export default function RankingEditorPage() {
                 </div>
               )}
             </div>
+            )}
           </>
         )}
 
-        {/* NON-AUTHOR: suggest a reorder */}
-        {!isAuthor && (
+        {/* Approval mode, non-author: suggest a reorder */}
+        {!canLive && (
           <>
             <SectionLabel>Current ranking</SectionLabel>
             {draft === null ? (

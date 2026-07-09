@@ -38,6 +38,10 @@ export type Ranking = {
   kind: RankingKind;
   /** for personal ballots: the display name of the rater who submitted it */
   rater?: string | null;
+  /** "open" = anyone can edit; "approval" = only author edits, others suggest */
+  editMode?: "open" | "approval";
+  /** display name of whoever last edited the order */
+  editedBy?: string | null;
   createdAt: number;
   updatedAt: number;
 };

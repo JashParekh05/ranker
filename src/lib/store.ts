@@ -164,6 +164,7 @@ const localStore = {
       order: [],
       author: author.trim() || "Anonymous",
       kind: "category",
+      editMode: "open",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -224,7 +225,7 @@ const localStore = {
   },
   async saveRanking(
     id: string,
-    patch: Partial<Pick<Ranking, "title" | "order">>
+    patch: Partial<Pick<Ranking, "title" | "order" | "editMode" | "editedBy">>
   ) {
     const data = readLocal();
     const r = data.rankings.find((x) => x.id === id);
@@ -234,6 +235,8 @@ const localStore = {
       r.prevOrder = r.order;
       r.order = patch.order;
     }
+    if (patch.editMode !== undefined) r.editMode = patch.editMode;
+    if (patch.editedBy !== undefined) r.editedBy = patch.editedBy;
     r.updatedAt = Date.now();
     writeLocal(data);
   },
@@ -330,6 +333,8 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         author: r.author ?? "Anonymous",
         kind: (r.kind ?? "category") as Ranking["kind"],
         rater: r.rater ?? null,
+        editMode: (r.edit_mode ?? "open") as "open" | "approval",
+        editedBy: r.edited_by ?? null,
         createdAt: Number(r.created_at),
         updatedAt: Number(r.updated_at),
       }));
@@ -433,6 +438,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         order: [],
         author: author.trim() || "Anonymous",
         kind: "category",
+        editMode: "open",
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -443,6 +449,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         order: ranking.order,
         author: ranking.author,
         kind: "category",
+        edit_mode: "open",
         created_at: ranking.createdAt,
         updated_at: ranking.updatedAt,
       });
@@ -514,10 +521,12 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
     },
     async saveRanking(
       id: string,
-      patch: Partial<Pick<Ranking, "title" | "order">>
+      patch: Partial<Pick<Ranking, "title" | "order" | "editMode" | "editedBy">>
     ) {
       const upd: Record<string, unknown> = { updated_at: Date.now() };
       if (patch.title !== undefined) upd.title = patch.title.trim();
+      if (patch.editMode !== undefined) upd.edit_mode = patch.editMode;
+      if (patch.editedBy !== undefined) upd.edited_by = patch.editedBy;
       if (patch.order !== undefined) {
         const { data: cur } = await db
           .from("gc_rankings")
