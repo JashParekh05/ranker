@@ -37,3 +37,5 @@ by localStorage. To move to Supabase for cross-device sync, implement the
 same `Store` surface against `@supabase/supabase-js` and swap the export.
 Suggested tables: `group_chats`, `people`, `rankings` (with `order` as a
 `text[]` of person ids). No component changes required.
+
+_Auto-deploy connected via Vercel + GitHub._
