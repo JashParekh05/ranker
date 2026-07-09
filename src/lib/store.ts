@@ -150,7 +150,7 @@ const localStore = {
       id: uuid(),
       gcId,
       title: title.trim() || "Untitled ranking",
-      order: gc ? gc.people.map((p) => p.id) : [],
+      order: [],
       author: author.trim() || "Anonymous",
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -338,12 +338,11 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
       return (await self.getAll()).rankings.find((r) => r.id === id);
     },
     async createRanking(gcId: string, title: string, author: string) {
-      const gc = await self.getGroupChat(gcId);
       const ranking: Ranking = {
         id: uuid(),
         gcId,
         title: title.trim() || "Untitled ranking",
-        order: gc ? gc.people.map((p) => p.id) : [],
+        order: [],
         author: author.trim() || "Anonymous",
         createdAt: Date.now(),
         updatedAt: Date.now(),
