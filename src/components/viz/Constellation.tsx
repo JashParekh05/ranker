@@ -99,7 +99,7 @@ export function Constellation({
     <div className="flex h-full flex-col">
       <div className="no-scrollbar flex items-center gap-2 overflow-x-auto px-4 py-2">
         <span className="mr-1 shrink-0 text-xs font-semibold uppercase tracking-wide text-white/50">
-          Orbit by
+          Rank by
         </span>
         <Pill active={mode === "overall"} onClick={() => setMode("overall")}>
           Overall
@@ -116,6 +116,11 @@ export function Constellation({
           Re-layout
         </button>
       </div>
+
+      <p className="px-4 pb-1 text-xs text-white/45">
+        Visual leaderboard. Closer to the center and bigger = ranked higher.
+        {rankings.length === 0 && " Create a ranking to spread people out."}
+      </p>
 
       <div
         ref={boardRef}

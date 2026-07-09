@@ -180,6 +180,18 @@ export function QuadrantScatter({
           Create a ranking to plot people.
         </div>
       )}
+
+      {rankings.length > 0 && (
+        <div className="pointer-events-none absolute bottom-3 right-3 max-w-[240px] rounded-2xl border border-white/10 bg-black/40 px-3 py-2 text-[11px] leading-snug text-white/70 backdrop-blur">
+          Each dot is a person. Left/right = {labelFor(xKey)}, up/down ={" "}
+          {labelFor(yKey)}. Use the dropdowns to change the axes.
+          {(xKey === "controversy" || yKey === "controversy") && (
+            <span className="mt-1 block text-white/50">
+              Controversy = how much the group disagrees about someone.
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
