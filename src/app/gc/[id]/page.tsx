@@ -349,8 +349,8 @@ export default function GcHubPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {personalPrompts.map((pr) => (
-                <Link key={pr.id} href={`/gc/${gc.id}/personal/${pr.id}`}>
-                  <Card className="p-5 transition hover:-translate-y-1 hover:shadow-pop">
+                <Card key={pr.id} className="p-5">
+                  <Link href={`/gc/${gc.id}/personal/${pr.id}`} className="block">
                     <div className="font-display text-lg font-700 text-ink">
                       {pr.title}
                     </div>
@@ -360,8 +360,21 @@ export default function GcHubPage() {
                       </span>
                       <span>by {pr.author}</span>
                     </div>
-                  </Card>
-                </Link>
+                  </Link>
+                  <div className="mt-4 flex gap-2">
+                    <Link href={`/gc/${gc.id}/personal/${pr.id}`} className="flex-1">
+                      <Button variant="soft" className="w-full">
+                        Fill ballot
+                      </Button>
+                    </Link>
+                    <Link
+                      href={`/gc/${gc.id}/consensus/${pr.id}`}
+                      className="flex-1"
+                    >
+                      <Button className="w-full">Consensus</Button>
+                    </Link>
+                  </div>
+                </Card>
               ))}
             </div>
           )}

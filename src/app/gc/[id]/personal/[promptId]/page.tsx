@@ -72,8 +72,8 @@ export default function PersonalBallotPage() {
         right={
           <>
             <NameBadge />
-            <Link href={`/gc/${gc.id}/map`}>
-              <Button variant="soft">Reciprocity map</Button>
+            <Link href={`/gc/${gc.id}/consensus/${prompt.id}`}>
+              <Button variant="soft">Group consensus</Button>
             </Link>
           </>
         }
