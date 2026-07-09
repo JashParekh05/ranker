@@ -63,6 +63,7 @@ export function RankBuilder({
               key={pid}
               value={pid}
               dragListener={!disabled}
+              style={{ touchAction: disabled ? "auto" : "none" }}
               whileDrag={{
                 scale: 1.03,
                 boxShadow: "0 12px 30px -8px rgba(124,58,237,0.45)",

@@ -27,6 +27,7 @@ export function Tilt({
     <motion.div
       style={{ rotateX, rotateY, transformPerspective: 900 }}
       onPointerMove={(e) => {
+        if (e.pointerType === "touch") return; // no tilt on touch, it fights taps
         const r = e.currentTarget.getBoundingClientRect();
         x.set((e.clientX - r.left) / r.width - 0.5);
         y.set((e.clientY - r.top) / r.height - 0.5);

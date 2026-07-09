@@ -51,7 +51,7 @@ export default function MapPage() {
   ];
 
   return (
-    <main className="h-screen overflow-hidden bg-[#070d1a]">
+    <main className="h-[100dvh] overflow-hidden bg-[#070d1a]">
       <div className="border-b border-white/10 bg-[#0a1120]/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3">
           <a
@@ -80,7 +80,7 @@ export default function MapPage() {
         </div>
       </div>
 
-      <div className="h-[calc(100vh-57px)]">
+      <div className="h-[calc(100dvh-57px)]">
         {view === "constellation" && (
           <Constellation gc={gc} rankings={categoryRankings} />
         )}

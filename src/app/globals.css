@@ -10,6 +10,22 @@ html,
 body {
   padding: 0;
   margin: 0;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS Safari zooms the page when you focus an input with font-size < 16px.
+   Force 16px on small screens to stop the jarring auto-zoom. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 body {
