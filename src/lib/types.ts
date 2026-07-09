@@ -61,8 +61,26 @@ export type Revision = {
   resolvedAt?: number;
 };
 
+/**
+ * A committed past version of a ranking's order. One row is written every time
+ * the order changes (a live edit or an approved suggestion), building a full
+ * timeline of who reordered the list and when.
+ */
+export type Snapshot = {
+  id: string;
+  rankingId: string;
+  gcId: string;
+  /** the order as it stood at this point in time */
+  order: string[];
+  /** display name of whoever made this edit */
+  editedBy?: string | null;
+  createdAt: number;
+};
+
 export type AppData = {
   groupChats: GroupChat[];
   rankings: Ranking[];
   revisions: Revision[];
+  /** present in the local backend; the shared backend loads these on demand */
+  snapshots?: Snapshot[];
 };

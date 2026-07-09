@@ -8,6 +8,7 @@ import type {
   Person,
   Ranking,
   Revision,
+  Snapshot,
 } from "./types";
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -49,18 +50,19 @@ const KEY = "gc-rankings:v2";
 
 function readLocal(): AppData {
   if (typeof window === "undefined")
-    return { groupChats: [], rankings: [], revisions: [] };
+    return { groupChats: [], rankings: [], revisions: [], snapshots: [] };
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { groupChats: [], rankings: [], revisions: [] };
+    if (!raw) return { groupChats: [], rankings: [], revisions: [], snapshots: [] };
     const p = JSON.parse(raw) as AppData;
     return {
       groupChats: p.groupChats ?? [],
       rankings: p.rankings ?? [],
       revisions: p.revisions ?? [],
+      snapshots: p.snapshots ?? [],
     };
   } catch {
-    return { groupChats: [], rankings: [], revisions: [] };
+    return { groupChats: [], rankings: [], revisions: [], snapshots: [] };
   }
 }
 
@@ -234,6 +236,17 @@ const localStore = {
     if (patch.order !== undefined) {
       r.prevOrder = r.order;
       r.order = patch.order;
+      if (patch.order.length > 0) {
+        data.snapshots = data.snapshots ?? [];
+        data.snapshots.push({
+          id: uuid(),
+          rankingId: r.id,
+          gcId: r.gcId,
+          order: patch.order,
+          editedBy: patch.editedBy ?? r.editedBy ?? null,
+          createdAt: Date.now(),
+        });
+      }
     }
     if (patch.editMode !== undefined) r.editMode = patch.editMode;
     if (patch.editedBy !== undefined) r.editedBy = patch.editedBy;
@@ -250,6 +263,12 @@ const localStore = {
   async getRevisions(rankingId: string) {
     return readLocal()
       .revisions.filter((r) => r.rankingId === rankingId)
+      .sort((a, b) => b.createdAt - a.createdAt);
+  },
+  // --- snapshots (version history) ---
+  async getSnapshots(rankingId: string): Promise<Snapshot[]> {
+    return (readLocal().snapshots ?? [])
+      .filter((s) => s.rankingId === rankingId)
       .sort((a, b) => b.createdAt - a.createdAt);
   },
   async proposeRevision(
@@ -281,6 +300,17 @@ const localStore = {
       r.prevOrder = r.order;
       r.order = rev.order;
       r.updatedAt = Date.now();
+      if (rev.order.length > 0) {
+        data.snapshots = data.snapshots ?? [];
+        data.snapshots.push({
+          id: uuid(),
+          rankingId: r.id,
+          gcId: r.gcId,
+          order: rev.order,
+          editedBy: rev.proposedBy,
+          createdAt: Date.now(),
+        });
+      }
     }
     rev.status = "approved";
     rev.resolvedAt = Date.now();
@@ -530,11 +560,21 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
       if (patch.order !== undefined) {
         const { data: cur } = await db
           .from("gc_rankings")
-          .select("order")
+          .select("order, gc_id")
           .eq("id", id)
           .limit(1);
         upd.prev_order = cur?.[0]?.order ?? [];
         upd.order = patch.order;
+        if (patch.order.length > 0 && cur?.[0]?.gc_id) {
+          await db.from("gc_snapshots").insert({
+            id: uuid(),
+            ranking_id: id,
+            gc_id: cur[0].gc_id,
+            order: patch.order,
+            edited_by: patch.editedBy ?? null,
+            created_at: Date.now(),
+          });
+        }
       }
       await db.from("gc_rankings").update(upd).eq("id", id);
       emitChange();
@@ -546,6 +586,22 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
     async getRevisions(rankingId: string) {
       return (await self.getAll()).revisions
         .filter((r) => r.rankingId === rankingId)
+        .sort((a, b) => b.createdAt - a.createdAt);
+    },
+    async getSnapshots(rankingId: string): Promise<Snapshot[]> {
+      const { data: rows } = await db
+        .from("gc_snapshots")
+        .select("*")
+        .eq("ranking_id", rankingId);
+      return (rows ?? [])
+        .map((s) => ({
+          id: s.id,
+          rankingId: s.ranking_id,
+          gcId: s.gc_id,
+          order: s.order ?? [],
+          editedBy: s.edited_by ?? null,
+          createdAt: Number(s.created_at),
+        }))
         .sort((a, b) => b.createdAt - a.createdAt);
     },
     async proposeRevision(
@@ -596,6 +652,16 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
           updated_at: Date.now(),
         })
         .eq("id", rev.ranking_id);
+      if ((rev.order ?? []).length > 0) {
+        await db.from("gc_snapshots").insert({
+          id: uuid(),
+          ranking_id: rev.ranking_id,
+          gc_id: rev.gc_id,
+          order: rev.order,
+          edited_by: rev.proposed_by,
+          created_at: Date.now(),
+        });
+      }
       await db
         .from("gc_revisions")
         .update({ status: "approved", resolved_at: Date.now() })

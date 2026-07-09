@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Reorder, motion } from "motion/react";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
@@ -81,6 +82,9 @@ export default function RankingEditorPage() {
         back={{ href: `/gc/${gc.id}`, label: gc.name }}
         right={
           <>
+            <Link href={`/gc/${gc.id}/rank/${rankId}/history`}>
+              <Button variant="soft">History</Button>
+            </Link>
             <Button
               variant="soft"
               disabled={exporting}

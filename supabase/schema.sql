@@ -41,6 +41,17 @@ create table if not exists gc_revisions (
   resolved_at bigint
 );
 
+-- Version history: one row per committed order change (live edit or approved
+-- suggestion), building a full timeline of who reordered a ranking and when.
+create table if not exists gc_snapshots (
+  id uuid primary key,
+  ranking_id uuid not null references gc_rankings(id) on delete cascade,
+  gc_id uuid not null references gc_group_chats(id) on delete cascade,
+  "order" text[] not null default '{}',
+  edited_by text,
+  created_at bigint not null
+);
+
 -- If upgrading an existing v1 database, add the new columns:
 --   alter table gc_group_chats add column if not exists code text;
 --   alter table gc_rankings   add column if not exists author text not null default 'Anonymous';
@@ -48,6 +59,7 @@ create table if not exists gc_revisions (
 create index if not exists gc_people_gc_id_idx on gc_people(gc_id);
 create index if not exists gc_rankings_gc_id_idx on gc_rankings(gc_id);
 create index if not exists gc_revisions_ranking_idx on gc_revisions(ranking_id);
+create index if not exists gc_snapshots_ranking_idx on gc_snapshots(ranking_id);
 create index if not exists gc_group_chats_code_idx on gc_group_chats(code);
 
 -- Realtime: broadcast row changes to all connected clients.
@@ -55,6 +67,7 @@ alter publication supabase_realtime add table gc_group_chats;
 alter publication supabase_realtime add table gc_people;
 alter publication supabase_realtime add table gc_rankings;
 alter publication supabase_realtime add table gc_revisions;
+alter publication supabase_realtime add table gc_snapshots;
 
 -- Row Level Security.
 -- NOTE: this app has NO user auth. Identity is a self-declared name only.
@@ -66,6 +79,7 @@ alter table gc_group_chats enable row level security;
 alter table gc_people enable row level security;
 alter table gc_rankings enable row level security;
 alter table gc_revisions enable row level security;
+alter table gc_snapshots enable row level security;
 
 create policy "public rw group_chats" on gc_group_chats
   for all using (true) with check (true);
@@ -74,4 +88,6 @@ create policy "public rw people" on gc_people
 create policy "public rw rankings" on gc_rankings
   for all using (true) with check (true);
 create policy "public rw revisions" on gc_revisions
+  for all using (true) with check (true);
+create policy "public rw snapshots" on gc_snapshots
   for all using (true) with check (true);
