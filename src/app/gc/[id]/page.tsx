@@ -121,7 +121,7 @@ export default function GcHubPage() {
           <Card className="mb-6 flex items-center justify-between gap-3 p-4">
             <div>
               <div className="text-xs font-semibold text-muted">Group code</div>
-              <div className="font-display text-2xl font-700 tracking-[0.3em] text-brand-700">
+              <div className="font-display text-2xl font-700 tracking-[0.3em] text-brand-300">
                 {gc.code}
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function GcHubPage() {
             </h2>
             <button
               onClick={() => setManageRoster((v) => !v)}
-              className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+              className="text-sm font-semibold text-brand-300 hover:text-brand-300"
             >
               {manageRoster ? "Done" : "Edit"}
             </button>
@@ -188,7 +188,7 @@ export default function GcHubPage() {
                           await store.removePerson(gc.id, a.person.id);
                           refresh();
                         }}
-                        className="absolute -left-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white text-xs text-red-500 shadow"
+                        className="absolute -left-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white/[0.06] text-xs text-red-500 shadow"
                         aria-label={`Remove ${a.person.name}`}
                       >
                         x
@@ -213,7 +213,7 @@ export default function GcHubPage() {
                 onChange={(e) => setNewPerson(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addPerson()}
                 placeholder="Add a person"
-                className="w-56 rounded-full border border-brand-200 bg-white px-4 py-2 text-sm outline-none focus:border-brand-500"
+                className="w-56 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm outline-none focus:border-brand-500"
               />
               <Button variant="soft" onClick={addPerson}>
                 Add
@@ -234,7 +234,7 @@ export default function GcHubPage() {
               onChange={(e) => setNewRank(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createRanking()}
               placeholder="New ranking title (e.g. Funniest, Best Hoopers)"
-              className="flex-1 rounded-full border border-brand-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+              className="flex-1 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm outline-none focus:border-brand-500"
             />
             <Button onClick={createRanking} disabled={!newRank.trim()}>
               Create ranking
@@ -275,7 +275,7 @@ export default function GcHubPage() {
               onChange={(e) => setNewPersonal(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createPersonal()}
               placeholder="Prompt (e.g. Rank the group, best wingman to worst)"
-              className="flex-1 rounded-full border border-brand-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+              className="flex-1 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm outline-none focus:border-brand-500"
             />
             <Button variant="soft" onClick={createPersonal} disabled={!newPersonal.trim()}>
               Create personal ranking

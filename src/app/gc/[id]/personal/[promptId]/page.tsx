@@ -102,7 +102,7 @@ export default function PersonalBallotPage() {
             {ballots.map((b) => (
               <span
                 key={b.id}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm shadow-soft"
+                className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1.5 text-sm shadow-soft"
               >
                 <span
                   className="grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold text-white"

@@ -66,7 +66,7 @@ export default function HomePage() {
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             onKeyDown={(e) => e.key === "Enter" && join()}
             placeholder="Enter group code (e.g. K7P2QX)"
-            className="flex-1 rounded-full border border-brand-200 bg-white px-4 py-2.5 text-sm tracking-widest outline-none focus:border-brand-500"
+            className="flex-1 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm tracking-widest outline-none focus:border-brand-500"
           />
           <Button variant="soft" onClick={join} disabled={!joinCode.trim()}>
             Join group
@@ -86,7 +86,7 @@ export default function HomePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Gt Q'ithers"
-              className="mb-4 w-full rounded-xl border border-brand-200 bg-white px-4 py-2.5 outline-none focus:border-brand-500"
+              className="mb-4 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 outline-none focus:border-brand-500"
             />
             <label className="mb-1 block text-sm font-semibold text-ink">
               Roster (one per line or comma separated)
@@ -96,7 +96,7 @@ export default function HomePage() {
               onChange={(e) => setPeople(e.target.value)}
               rows={4}
               placeholder={"Mokshith\nKuvin\nBertha"}
-              className="mb-4 w-full rounded-xl border border-brand-200 bg-white px-4 py-2.5 outline-none focus:border-brand-500"
+              className="mb-4 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 outline-none focus:border-brand-500"
             />
             <Button onClick={create} disabled={!name.trim()}>
               Create group
@@ -127,7 +127,7 @@ export default function HomePage() {
                         <div className="font-display text-lg font-700 text-ink">
                           {gc.name}
                         </div>
-                        <span className="rounded-full bg-brand-100 px-2 py-0.5 font-mono text-xs font-bold tracking-widest text-brand-700">
+                        <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-xs font-bold tracking-widest text-brand-300">
                           {gc.code}
                         </span>
                       </div>

@@ -190,7 +190,7 @@ export default function RankingEditorPage() {
                   {myProposals.map((rev) => (
                     <div
                       key={rev.id}
-                      className="flex items-center justify-between rounded-xl2 border border-brand-100 bg-white/70 px-4 py-2.5 text-sm"
+                      className="flex items-center justify-between rounded-xl2 border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm"
                     >
                       <span className="text-muted">
                         {new Date(rev.createdAt).toLocaleDateString()} reorder

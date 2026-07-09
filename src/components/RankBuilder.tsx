@@ -39,7 +39,7 @@ export function RankBuilder({
               <button
                 key={p.id}
                 onClick={() => emit([...order, p.id])}
-                className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1.5 text-sm font-medium text-ink shadow-soft transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-pop"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm font-medium text-ink shadow-soft transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-pop"
               >
                 <span
                   className="grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold text-white"
@@ -68,11 +68,11 @@ export function RankBuilder({
                 boxShadow: "0 12px 30px -8px rgba(124,58,237,0.45)",
               }}
               className={
-                "flex select-none items-center gap-3 rounded-xl2 border border-brand-100 bg-white/85 px-4 py-3 shadow-soft " +
+                "flex select-none items-center gap-3 rounded-xl2 border border-white/10 bg-white/[0.06] px-4 py-3 shadow-soft " +
                 (disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing")
               }
             >
-              <span className="w-6 text-center font-display text-lg font-700 text-brand-600">
+              <span className="w-6 text-center font-display text-lg font-700 text-brand-300">
                 {i + 1}
               </span>
               <span
@@ -107,12 +107,12 @@ export function RankBuilder({
           {Array.from({ length: emptyCount }).map((_, k) => (
             <div
               key={k}
-              className="flex items-center gap-3 rounded-xl2 border border-dashed border-brand-200 px-4 py-3 text-muted"
+              className="flex items-center gap-3 rounded-xl2 border border-dashed border-white/10 px-4 py-3 text-muted"
             >
               <span className="w-6 text-center font-display text-lg font-700 text-brand-300">
                 {order.length + k + 1}
               </span>
-              <span className="h-9 w-9 rounded-full border border-dashed border-brand-200" />
+              <span className="h-9 w-9 rounded-full border border-dashed border-white/10" />
               <span className="text-sm">empty slot</span>
             </div>
           ))}
@@ -120,7 +120,7 @@ export function RankBuilder({
       )}
 
       {disabled && order.length === 0 && (
-        <div className="rounded-xl2 border border-dashed border-brand-200 p-6 text-center text-sm text-muted">
+        <div className="rounded-xl2 border border-dashed border-white/10 p-6 text-center text-sm text-muted">
           No one has been ranked yet.
         </div>
       )}

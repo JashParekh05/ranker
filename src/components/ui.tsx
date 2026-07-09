@@ -12,10 +12,10 @@ export function Button({
 }) {
   const styles = {
     primary:
-      "bg-brand-600 text-white hover:bg-brand-700 shadow-pop active:scale-[0.98]",
-    soft: "bg-brand-100 text-brand-700 hover:bg-brand-200",
-    ghost: "bg-transparent text-muted hover:bg-brand-50 hover:text-brand-700",
-    danger: "bg-transparent text-red-500 hover:bg-red-50",
+      "bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-pop hover:brightness-110 active:scale-[0.98]",
+    soft: "bg-white/10 text-brand-200 hover:bg-white/20 border border-white/10",
+    ghost: "bg-transparent text-muted hover:bg-white/10 hover:text-ink",
+    danger: "bg-transparent text-red-400 hover:bg-red-500/10",
   }[variant];
   return (
     <button
@@ -34,15 +34,7 @@ export function Card({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        "rounded-xl2 border border-brand-100 bg-white/80 backdrop-blur shadow-soft",
-        className
-      )}
-      {...props}
-    />
-  );
+  return <div className={cn("glass rounded-xl2", className)} {...props} />;
 }
 
 export function TopBar({
@@ -55,12 +47,12 @@ export function TopBar({
   right?: React.ReactNode;
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-brand-100 bg-white/70 backdrop-blur-md">
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-base/60 backdrop-blur-xl">
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-5 py-4">
         {back && (
           <Link
             href={back.href}
-            className="rounded-full px-3 py-1.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
+            className="rounded-full px-3 py-1.5 text-sm font-semibold text-brand-200 transition hover:bg-white/10"
           >
             {"< "}
             {back.label ?? "Back"}

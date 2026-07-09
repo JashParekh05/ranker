@@ -29,7 +29,7 @@ export function IdentityGate() {
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && draft.trim() && save(draft)}
           placeholder="e.g. Mokshith"
-          className="mb-4 w-full rounded-xl border border-brand-200 bg-white px-4 py-2.5 outline-none focus:border-brand-500"
+          className="mb-4 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 outline-none focus:border-brand-500"
         />
         <Button
           className="w-full"
@@ -66,14 +66,14 @@ export function NameBadge() {
             setEditing(false);
           }
         }}
-        className="w-32 rounded-full border border-brand-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500"
+        className="w-32 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm outline-none focus:border-brand-500"
       />
     );
   return (
     <button
       onClick={() => setEditing(true)}
       title="Change name"
-      className="rounded-full bg-brand-100 px-3 py-1.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-200"
+      className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold text-brand-300 transition hover:bg-white/10"
     >
       {me}
     </button>

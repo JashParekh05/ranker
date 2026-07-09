@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Card } from "@/components/ui";
+import { Tilt } from "@/components/Tilt";
 import { colorFor, initials } from "@/lib/utils";
 import type { GroupChat, Ranking } from "@/lib/types";
 
@@ -67,8 +68,9 @@ export function RankingCard({
 
   return (
     <Link href={`/gc/${gc.id}/rank/${ranking.id}`}>
-      <Card className="p-5 transition hover:-translate-y-1 hover:shadow-pop">
-        <div className="mb-1 flex items-center justify-between gap-2">
+      <Tilt>
+        <Card className="p-5 transition hover:shadow-pop">
+          <div className="mb-1 flex items-center justify-between gap-2">
           <div className="truncate font-display text-lg font-700 text-ink">
             {ranking.title}
           </div>
@@ -81,18 +83,18 @@ export function RankingCard({
         <div className="mb-4 text-xs text-muted">by {ranking.author}</div>
 
         {placed.length === 0 ? (
-          <div className="flex items-end justify-center gap-3 rounded-xl border border-dashed border-brand-200 py-6 text-muted">
+          <div className="flex items-end justify-center gap-3 rounded-xl border border-dashed border-white/10 py-6 text-muted">
             <div className="flex flex-col items-center gap-1 opacity-50">
-              <span className="h-9 w-9 rounded-full border border-dashed border-brand-300" />
-              <span className="h-10 w-8 rounded-t-md bg-brand-100" />
+              <span className="h-9 w-9 rounded-full border border-dashed border-white/15" />
+              <span className="h-10 w-8 rounded-t-md bg-white/10" />
             </div>
             <div className="flex flex-col items-center gap-1 opacity-70">
-              <span className="h-11 w-11 rounded-full border border-dashed border-brand-300" />
-              <span className="h-16 w-8 rounded-t-md bg-brand-200" />
+              <span className="h-11 w-11 rounded-full border border-dashed border-white/15" />
+              <span className="h-16 w-8 rounded-t-md bg-white/10" />
             </div>
             <div className="flex flex-col items-center gap-1 opacity-50">
-              <span className="h-9 w-9 rounded-full border border-dashed border-brand-300" />
-              <span className="h-8 w-8 rounded-t-md bg-brand-100" />
+              <span className="h-9 w-9 rounded-full border border-dashed border-white/15" />
+              <span className="h-8 w-8 rounded-t-md bg-white/10" />
             </div>
           </div>
         ) : (
@@ -158,6 +160,7 @@ export function RankingCard({
           </>
         )}
       </Card>
+      </Tilt>
     </Link>
   );
 }
