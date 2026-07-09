@@ -146,6 +146,9 @@ export default function GcHubPage() {
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-700 uppercase tracking-wide text-muted">
               Roster
+              <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-xs font-bold text-brand-200">
+                {gc.people.length}
+              </span>
             </h2>
             <button
               onClick={() => setManageRoster((v) => !v)}

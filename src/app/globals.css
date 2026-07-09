@@ -16,13 +16,13 @@ body {
   color: #f2eeff;
   font-family: var(--font-sans), system-ui, sans-serif;
   min-height: 100vh;
-  background-color: #0b0b12;
+  background-color: #17161f;
   /* Aurora: layered blurred color fields glowing behind everything */
   background-image:
-    radial-gradient(50rem 40rem at 12% -5%, rgba(139, 92, 246, 0.35), transparent 60%),
-    radial-gradient(45rem 38rem at 100% 0%, rgba(45, 212, 191, 0.22), transparent 55%),
-    radial-gradient(50rem 45rem at 85% 105%, rgba(236, 72, 153, 0.25), transparent 55%),
-    radial-gradient(60rem 50rem at 0% 100%, rgba(99, 102, 241, 0.28), transparent 60%);
+    radial-gradient(50rem 40rem at 12% -5%, rgba(139, 92, 246, 0.42), transparent 60%),
+    radial-gradient(45rem 38rem at 100% 0%, rgba(45, 212, 191, 0.28), transparent 55%),
+    radial-gradient(50rem 45rem at 85% 105%, rgba(236, 72, 153, 0.3), transparent 55%),
+    radial-gradient(60rem 50rem at 0% 100%, rgba(99, 102, 241, 0.34), transparent 60%);
   background-attachment: fixed;
 }
 

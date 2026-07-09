@@ -22,9 +22,9 @@ const config: Config = {
           900: "#4c1d95",
         },
         // dark surfaces (4-tier, never pure black)
-        base: "#0b0b12",
-        surface: "#14141f",
-        raised: "#1b1b2a",
+        base: "#17161f",
+        surface: "#1e1c29",
+        raised: "#262435",
         ink: "#f2eeff",
         muted: "#a49dc0",
       },
