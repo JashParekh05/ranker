@@ -18,7 +18,7 @@ export const ShareCard = forwardRef<
     .map((id) => byId.get(id))
     .filter(Boolean) as { id: string; name: string }[];
   const top = placed.slice(0, 3);
-  const rest = placed.slice(3, 8);
+  const rest = placed.slice(3); // everyone below the podium
   const medals = ["#f5c542", "#c8cdd6", "#d68a5b"];
 
   const Bar = ({ h, c, person, place }: { h: number; c: string; person: { id: string; name: string }; place: number }) => (
