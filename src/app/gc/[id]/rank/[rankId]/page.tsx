@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Reorder, motion } from "motion/react";
 import { store } from "@/lib/store";
@@ -9,6 +9,7 @@ import { useMe, sameName, useDevice } from "@/lib/identity";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 import { RankBuilder } from "@/components/RankBuilder";
+import { ShareCard, exportCard } from "@/components/ShareCard";
 import { colorFor, initials } from "@/lib/utils";
 import type { Person } from "@/lib/types";
 
@@ -41,6 +42,8 @@ export default function RankingEditorPage() {
   // author edits a live-committed order; non-author edits a draft proposal
   const [authorOrder, setAuthorOrder] = useState<string[] | null>(null);
   const [draft, setDraft] = useState<string[] | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (ranking && authorOrder === null) setAuthorOrder(ranking.order);
@@ -69,8 +72,38 @@ export default function RankingEditorPage() {
       <TopBar
         title={gc.name}
         back={{ href: `/gc/${gc.id}`, label: gc.name }}
-        right={<NameBadge />}
+        right={
+          <>
+            <Button
+              variant="soft"
+              disabled={exporting}
+              onClick={async () => {
+                if (!cardRef.current) return;
+                setExporting(true);
+                try {
+                  await exportCard(
+                    cardRef.current,
+                    `${gc.name}-${ranking.title}`
+                  );
+                } finally {
+                  setExporting(false);
+                }
+              }}
+            >
+              {exporting ? "..." : "Export"}
+            </Button>
+            <NameBadge />
+          </>
+        }
       />
+
+      {/* off-screen card used only for PNG export */}
+      <div
+        style={{ position: "fixed", left: -9999, top: 0, pointerEvents: "none" }}
+        aria-hidden
+      >
+        <ShareCard ref={cardRef} gc={gc} ranking={ranking} />
+      </div>
 
       <div className="mx-auto max-w-2xl px-5 py-8">
         {isAuthor ? (
