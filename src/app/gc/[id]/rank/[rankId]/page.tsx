@@ -42,6 +42,7 @@ export default function RankingEditorPage() {
   // author edits a live-committed order; non-author edits a draft proposal
   const [authorOrder, setAuthorOrder] = useState<string[] | null>(null);
   const [draft, setDraft] = useState<string[] | null>(null);
+  const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -156,13 +157,22 @@ export default function RankingEditorPage() {
         {/* Live edit: author (any mode) or anyone (open mode) */}
         {canLive && (
           <>
-            <SectionLabel>
-              {editMode === "open" ? "Edit ranking (anyone)" : "Edit ranking (saves live)"}
-            </SectionLabel>
+            <div className="mb-3 flex items-center justify-between">
+              <SectionLabel>
+                {editing ? "Editing — drag to reorder" : "Ranking"}
+              </SectionLabel>
+              <Button
+                variant={editing ? "primary" : "soft"}
+                onClick={() => setEditing((v) => !v)}
+              >
+                {editing ? "Done" : "Edit"}
+              </Button>
+            </div>
             <RankBuilder
               order={authorOrder ?? liveOrder}
               roster={gc.people}
               onChange={liveReorder}
+              disabled={!editing}
             />
 
             {editMode === "approval" && isAuthor && (
