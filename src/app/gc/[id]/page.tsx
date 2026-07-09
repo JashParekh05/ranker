@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
 import { useMe, useDevice, setMe } from "@/lib/identity";
+import { addJoined } from "@/lib/joined";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 import { RankingCard } from "@/components/RankingCard";
@@ -25,6 +26,10 @@ export default function GcHubPage() {
     [gc, device]
   );
   const identityName = myPerson?.name ?? me;
+
+  useEffect(() => {
+    if (gc) addJoined(gc.id);
+  }, [gc?.id]);
   const rankings = useMemo(
     () =>
       (data?.rankings ?? [])

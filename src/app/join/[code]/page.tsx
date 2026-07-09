@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { store } from "@/lib/store";
+import { addJoined } from "@/lib/joined";
 import { Button, Card } from "@/components/ui";
 
 export default function JoinPage() {
@@ -14,8 +15,10 @@ export default function JoinPage() {
     let active = true;
     store.getGroupChatByCode(String(code)).then((gc) => {
       if (!active) return;
-      if (gc) router.replace(`/gc/${gc.id}`);
-      else setStatus("notfound");
+      if (gc) {
+        addJoined(gc.id);
+        router.replace(`/gc/${gc.id}`);
+      } else setStatus("notfound");
     });
     return () => {
       active = false;

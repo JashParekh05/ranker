@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
+import { useJoined, addJoined } from "@/lib/joined";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 
 export default function HomePage() {
   const { data, refresh, loading } = useAppData();
+  const joined = useJoined();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -22,6 +24,7 @@ export default function HomePage() {
     if (!name.trim()) return;
     const roster = people.split(/[\n,]/).map((p) => p.trim()).filter(Boolean);
     const gc = await store.createGroupChat(name, roster);
+    addJoined(gc.id);
     setName("");
     setPeople("");
     setOpen(false);
@@ -36,6 +39,7 @@ export default function HomePage() {
       setJoinError("No group with that code.");
       return;
     }
+    addJoined(gc.id);
     router.push(`/gc/${gc.id}`);
   }
 
@@ -104,14 +108,19 @@ export default function HomePage() {
           </Card>
         )}
 
-        {loading ? null : data!.groupChats.length === 0 ? (
-          <Card className="p-10 text-center text-muted">
-            No groups yet. Create one, or join with a code.
-          </Card>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {data!.groupChats.map((gc, i) => {
-              const count = data!.rankings.filter(
+        {(() => {
+          const myGroups = (data?.groupChats ?? []).filter((g) =>
+            joined.includes(g.id)
+          );
+          if (loading) return null;
+          return myGroups.length === 0 ? (
+            <Card className="p-10 text-center text-muted">
+              No groups yet. Create one, or join with a code above.
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {myGroups.map((gc, i) => {
+                const count = data!.rankings.filter(
                 (r) => r.gcId === gc.id
               ).length;
               return (
@@ -141,7 +150,8 @@ export default function HomePage() {
               );
             })}
           </div>
-        )}
+          );
+        })()}
       </div>
     </main>
   );
