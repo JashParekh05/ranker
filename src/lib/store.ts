@@ -83,13 +83,18 @@ const localStore = {
     const c = code.trim().toUpperCase();
     return readLocal().groupChats.find((g) => g.code === c);
   },
-  async createGroupChat(name: string, people: string[] = []): Promise<GroupChat> {
+  async createGroupChat(
+    name: string,
+    people: string[] = [],
+    adminDevice?: string
+  ): Promise<GroupChat> {
     const data = readLocal();
     const gc: GroupChat = {
       id: uuid(),
       name: name.trim() || "Untitled group",
       code: genCode(),
       createdAt: Date.now(),
+      adminDevice: adminDevice ?? null,
       people: people
         .map((p) => p.trim())
         .filter(Boolean)
@@ -98,6 +103,12 @@ const localStore = {
     data.groupChats.push(gc);
     writeLocal(data);
     return gc;
+  },
+  async claimAdmin(gcId: string, deviceId: string) {
+    const data = readLocal();
+    const gc = data.groupChats.find((g) => g.id === gcId);
+    if (gc && !gc.adminDevice) gc.adminDevice = deviceId;
+    writeLocal(data);
   },
   async renameGroupChat(id: string, name: string) {
     const data = readLocal();
@@ -345,6 +356,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         name: g.name,
         code: g.code,
         createdAt: Number(g.created_at),
+        adminDevice: g.admin_device ?? null,
         people: (people ?? [])
           .filter((p) => p.gc_id === g.id)
           .map((p) => ({
@@ -387,7 +399,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
       const c = code.trim().toUpperCase();
       return (await self.getAll()).groupChats.find((g) => g.code === c);
     },
-    async createGroupChat(name: string, people: string[] = []) {
+    async createGroupChat(name: string, people: string[] = [], adminDevice?: string) {
       const id = uuid();
       const code = genCode();
       await db.from("gc_group_chats").insert({
@@ -395,6 +407,7 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         name: name.trim() || "Untitled group",
         code,
         created_at: Date.now(),
+        admin_device: adminDevice ?? null,
       });
       const rows = people
         .map((p) => p.trim())
@@ -407,8 +420,18 @@ function makeSupabaseStore(db: SupabaseClient): typeof localStore {
         name,
         code,
         createdAt: Date.now(),
+        adminDevice: adminDevice ?? null,
         people: rows.map((r) => ({ id: r.id, name: r.name })),
       } as GroupChat;
+    },
+    async claimAdmin(gcId: string, deviceId: string) {
+      // first-come: only set admin if not already claimed
+      await db
+        .from("gc_group_chats")
+        .update({ admin_device: deviceId })
+        .eq("id", gcId)
+        .is("admin_device", null);
+      emitChange();
     },
     async renameGroupChat(id: string, name: string) {
       await db.from("gc_group_chats").update({ name: name.trim() }).eq("id", id);

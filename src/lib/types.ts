@@ -16,6 +16,8 @@ export type GroupChat = {
   code: string;
   createdAt: number;
   people: Person[];
+  /** device token of the group creator/admin. Only they can delete rankings. */
+  adminDevice?: string | null;
 };
 
 export type RankingKind = "category" | "personal";

@@ -26,6 +26,25 @@ export default function GcHubPage() {
     [gc, device]
   );
   const identityName = myPerson?.name ?? me;
+  const isAdmin = Boolean(gc?.adminDevice && gc.adminDevice === device);
+  const adminUnclaimed = Boolean(gc && !gc.adminDevice);
+
+  async function deleteRanking(rid: string, title: string) {
+    if (!isAdmin) return;
+    if (!window.confirm(`Delete "${title}" for everyone? This cannot be undone.`))
+      return;
+    const target = (data?.rankings ?? []).find((r) => r.id === rid);
+    // for a personal prompt, also delete every ballot sharing its title
+    if (target?.kind === "personal") {
+      const related = (data?.rankings ?? []).filter(
+        (r) => r.gcId === gc!.id && r.kind === "personal" && r.title === title
+      );
+      for (const r of related) await store.deleteRanking(r.id);
+    } else {
+      await store.deleteRanking(rid);
+    }
+    refresh();
+  }
 
   useEffect(() => {
     if (gc) addJoined(gc.id);
@@ -151,6 +170,29 @@ export default function GcHubPage() {
               </Button>
               <Button onClick={share}>Share</Button>
             </div>
+          </Card>
+        )}
+
+        {/* Claim admin (unclaimed groups created before admin existed) */}
+        {device && adminUnclaimed && (
+          <Card className="mb-6 flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-ink">
+                No admin set for this group
+              </div>
+              <p className="text-xs text-muted">
+                The admin is the only one who can delete rankings. Claim it if
+                you created this group.
+              </p>
+            </div>
+            <Button
+              onClick={async () => {
+                await store.claimAdmin(gc.id, device);
+                refresh();
+              }}
+            >
+              Claim admin
+            </Button>
           </Card>
         )}
 
@@ -315,7 +357,13 @@ export default function GcHubPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
                 >
-                  <RankingCard gc={gc} ranking={r} pending={pendingCount(r.id)} />
+                  <RankingCard
+                    gc={gc}
+                    ranking={r}
+                    pending={pendingCount(r.id)}
+                    canDelete={isAdmin}
+                    onDelete={() => deleteRanking(r.id, r.title)}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -373,6 +421,14 @@ export default function GcHubPage() {
                     >
                       <Button className="w-full">Consensus</Button>
                     </Link>
+                    {isAdmin && (
+                      <Button
+                        variant="danger"
+                        onClick={() => deleteRanking(pr.id, pr.title)}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </Card>
               ))}

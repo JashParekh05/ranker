@@ -55,10 +55,14 @@ export function RankingCard({
   gc,
   ranking,
   pending,
+  canDelete,
+  onDelete,
 }: {
   gc: GroupChat;
   ranking: Ranking;
   pending: number;
+  canDelete?: boolean;
+  onDelete?: () => void;
 }) {
   const byId = new Map(gc.people.map((p) => [p.id, p]));
   const placed = ranking.order.filter((id) => byId.has(id));
@@ -78,6 +82,19 @@ export function RankingCard({
             <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
               {pending} pending
             </span>
+          )}
+          {canDelete && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete?.();
+              }}
+              className="shrink-0 rounded-full px-2 py-0.5 text-xs font-bold text-rose-400 transition hover:bg-rose-500/10"
+              aria-label={`Delete ${ranking.title}`}
+            >
+              Delete
+            </button>
           )}
         </div>
         <div className="mb-4 text-xs text-muted">by {ranking.author}</div>

@@ -4,7 +4,8 @@ create table if not exists gc_group_chats (
   id uuid primary key,
   name text not null,
   code text not null unique,
-  created_at bigint not null
+  created_at bigint not null,
+  admin_device text   -- device token of the group creator/admin (only they can delete rankings)
 );
 
 create table if not exists gc_people (

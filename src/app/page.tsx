@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { store } from "@/lib/store";
 import { useAppData } from "@/lib/useData";
 import { useJoined, addJoined } from "@/lib/joined";
+import { getDeviceId } from "@/lib/identity";
 import { Button, Card, TopBar } from "@/components/ui";
 import { NameBadge } from "@/components/identity";
 
@@ -23,7 +24,7 @@ export default function HomePage() {
   async function create() {
     if (!name.trim()) return;
     const roster = people.split(/[\n,]/).map((p) => p.trim()).filter(Boolean);
-    const gc = await store.createGroupChat(name, roster);
+    const gc = await store.createGroupChat(name, roster, getDeviceId());
     addJoined(gc.id);
     setName("");
     setPeople("");
